@@ -275,6 +275,7 @@
   .thinking-text span:nth-child(3) { animation-delay: 2.0s; }
   .thinking-text span:nth-child(4) { animation-delay: 3.0s; }
   .thinking-text span:nth-child(5) { animation-delay: 3.9s; }
+  .thinking-text span:nth-child(6) { animation-delay: 4.8s; }
   @keyframes fadein { to { opacity: 1; } }
 
   .disclaimer {
@@ -354,6 +355,113 @@
 
   .modal-cancel:hover { color: #888; }
 
+  .ai-verdict-card {
+    background: #0a0a0a;
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .ai-verdict-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+  }
+
+  .ai-badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #111;
+    color: #555;
+    border: 1px solid #222;
+  }
+
+  .ai-verdict-text {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.75;
+  }
+
+  .ai-flags {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .ai-flag-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: #111;
+    color: #555;
+    border: 1px solid #1e1e1e;
+  }
+
+  .ai-flag-tag.bad { background: #1a0a0a; color: #a44; border-color: #2a1010; }
+  .ai-flag-tag.ok  { background: #0a1a0a; color: #4a9; border-color: #102a10; }
+
+  .report-card {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 1.5rem;
+  }
+
+  .report-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.65rem 0;
+    border-bottom: 1px solid #111;
+    gap: 1rem;
+  }
+
+  .report-row:last-child { border-bottom: none; padding-bottom: 0; }
+  .report-row:first-child { padding-top: 0; }
+
+  .report-key {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    padding-top: 1px;
+  }
+
+  .report-val {
+    font-size: 12px;
+    color: #777;
+    text-align: right;
+    word-break: break-all;
+    max-width: 380px;
+  }
+
+  .report-val.highlight { color: #ccc; }
+
+  .found-phrases {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: flex-end;
+  }
+
+  .found-phrase {
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    background: #111;
+    color: #555;
+    border: 1px solid #1a1a1a;
+  }
+
   .objectives {
     width: 100%;
     max-width: 660px;
@@ -395,9 +503,9 @@
 <body>
 
 <header>
-  <p class="logo">// DELTA //</p>
-  <h1>detector de conteúdo ia</h1>
-  <p class="subtitle">saiba o que é humano e o que simplesmente não é. grátis e privado para sempre.</p>
+  <p class="logo">// delta //</p>
+  <h1>detector de desinformação</h1>
+  <p class="subtitle">saiba se um site é confiável. grátis e privado para sempre.</p>
 </header>
 
 <div class="card">
@@ -408,18 +516,18 @@
 
 <div id="results"></div>
 
-<p class="disclaimer">delta usa heurísticas locais — as pontuações são indicadores, não veredictos.</p>
+<p class="disclaimer">delta usa heurísticas locais e análise de ia — as pontuações são indicadores, não veredictos.</p>
 
 <section class="objectives">
   <p class="objectives-title">nossos objetivos</p>
   <div class="objectives-card">
     <div class="obj-item">
       <span class="obj-num">01</span>
-      <p class="obj-text">combater a desinformação digital, ajudando pessoas que não conseguem identificar tal anomalias.</p>
+      <p class="obj-text">combater a desinformação digital, ajudando pessoas que não conseguem identificar tais anomalias.</p>
     </div>
     <div class="obj-item">
       <span class="obj-num">02</span>
-      <p class="obj-text">oferecer uma ferramenta, grátis, sem anuncios e principalmente privada.</p>
+      <p class="obj-text">oferecer uma ferramenta, grátis, sem anúncios e principalmente privada.</p>
     </div>
     <div class="obj-item">
       <span class="obj-num">03</span>
@@ -427,7 +535,7 @@
     </div>
     <div class="obj-item">
       <span class="obj-num">04</span>
-      <p class="obj-text">incentivar o pensamento crítico: DELTA não substitui sua própria pesquisa, apenas te dá um ponto de partida.</p>
+      <p class="obj-text">incentivar o pensamento crítico: delta não substitui sua própria pesquisa, apenas te dá um ponto de partida.</p>
     </div>
   </div>
 </section>
@@ -436,7 +544,7 @@
   <div class="modal">
     <div class="modal-icon">⚠</div>
     <p class="modal-title">antes de continuar</p>
-    <p class="modal-text">os resultados não são 100% certos, por isso, recomendo que pesquise você mesmo(a) a reputação do site.</p>
+    <p class="modal-text">os resultados não são 100% precisos. recomendamos que você pesquise a reputação do site por conta própria.</p>
     <button class="modal-btn" onclick="confirm_scan()">entendi, continuar</button>
     <button class="modal-cancel" onclick="cancel_scan()">cancelar</button>
   </div>
@@ -445,9 +553,7 @@
 <script>
 const cache_prefix = "delta_cache_";
 const cache_ttl = 1000 * 60 * 60 * 24;
-
-const worker_url = "	calm-silence-a533.thyricsmall999.workers.dev";
-
+const worker_url = "calm-silence-a533.thyricsmall999.workers.dev";
 const api_model = "llama-3.3-70b-versatile";
 
 const proxies = [
@@ -482,6 +588,29 @@ const trust_db = {
   ]
 };
 
+const misinfo_phrases = [
+  "they don't want you to know","the truth they hide","wake up","sheeple",
+  "mainstream media won't tell","big pharma","deep state","new world order",
+  "false flag","plandemic","microchip","5g causes","bill gates wants",
+  "government is hiding","banned from youtube","censored","they're lying",
+  "share before deleted","doctors don't want","cure they don't want",
+  "o que eles escondem","a verdade que a mídia omite","acordem",
+  "mídia não vai mostrar","grande reset","estado profundo",
+  "vacina causa","chip na vacina","governo esconde","compartilhe antes",
+  "médicos não querem que você saiba","cura proibida","fraude global",
+  "golpe eleitoral","voto fraudado","urna fraudada","mídia manipulada",
+  "complô","globalismo","agenda secreta"
+];
+
+const emotional_phrases = [
+  "shocking","outrageous","you won't believe","bombshell","explosive",
+  "devastating","terrifying","horrifying","disgusting","unbelievable",
+  "breaking","urgent","alert","warning","danger","crisis","catastrophe",
+  "chocante","inacreditável","bomba","explosivo","devastador","aterrorizante",
+  "horrível","nojento","urgente","alerta","perigo","crise","catástrofe",
+  "escândalo","revoltante","absurdo","criminoso","vergonhoso"
+];
+
 const ai_phrases = [
   "in today's world","it's worth noting","in conclusion","furthermore",
   "it is important to note","in summary","delve into","dive into",
@@ -500,7 +629,10 @@ const ad_networks = [
   "prebid","header-bidding","exoclick","ads.txt"
 ];
 
+const suspicious_tlds = [".xyz",".info",".top",".click",".link",".win",".bid",".stream",".download",".review",".gq",".ml",".cf",".tk",".ga"];
+
 let pending_url = null;
+let last_scan_report = null;
 
 function get_root_domain(url) {
   try { return new URL(url).hostname.replace(/^www\./, ""); }
@@ -511,6 +643,10 @@ function check_trust_db(domain) {
   for (const d of trust_db.verified) { if (domain === d || domain.endsWith("." + d)) return "verified"; }
   for (const d of trust_db.flagged)  { if (domain === d || domain.endsWith("." + d)) return "flagged"; }
   return null;
+}
+
+function check_suspicious_tld(domain) {
+  return suspicious_tlds.some(t => domain.endsWith(t));
 }
 
 function get_cache(key) {
@@ -566,11 +702,6 @@ function extract_text(doc) {
   return ((doc.body || doc.documentElement).innerText || "").replace(/\s+/g, " ").trim();
 }
 
-function score_comments(html) {
-  const count = (html.match(/<!--[\s\S]*?-->/g) || []).length;
-  return { score: Math.min(100, Math.round((count / 30) * 100)), raw: count };
-}
-
 function score_ads(html, doc) {
   const lower = html.toLowerCase();
   const networks = ad_networks.filter(n => lower.includes(n)).length;
@@ -582,21 +713,49 @@ function score_ads(html, doc) {
   return { score: Math.min(100, Math.round((total / 20) * 100)), networks, iframes, ad_divs };
 }
 
-function score_metadata(doc, html) {
+function score_metadata(doc, html, domain) {
   let flags = 0;
   const author_tags = ['meta[name="author"]','[rel="author"]','[class*="author"]','[itemprop="author"]','[class*="byline"]','[class*="writer"]'];
-  if (!author_tags.some(s => doc.querySelector(s))) flags += 3;
+  const has_author = author_tags.some(s => doc.querySelector(s));
+  if (!has_author) flags += 3;
+
   const date_tags = ['meta[property="article:published_time"]','time','[itemprop="datePublished"]','[class*="date"]','[class*="published"]'];
-  if (!date_tags.some(s => doc.querySelector(s))) flags += 2;
-  if (!html.includes("/about") && !html.includes("/sobre")) flags++;
-  if (!html.includes("/contact") && !html.includes("/contato")) flags++;
+  const has_date = date_tags.some(s => doc.querySelector(s));
+  if (!has_date) flags += 2;
+
+  const has_about = html.includes("/about") || html.includes("/sobre");
+  const has_contact = html.includes("/contact") || html.includes("/contato");
+  if (!has_about) flags++;
+  if (!has_contact) flags++;
   if (!doc.querySelector('meta[name="description"]')) flags++;
-  const max = 8;
-  return { score: Math.min(100, Math.round((flags / max) * 100)), flags, max_flags: max };
+
+  const has_https = domain ? !domain.startsWith("http://") : true;
+  if (!has_https) flags += 2;
+
+  const is_sus_tld = check_suspicious_tld(domain || "");
+  if (is_sus_tld) flags += 3;
+
+  const privacy = html.includes("/privacy") || html.includes("/privacidade");
+  if (!privacy) flags++;
+
+  const max = 14;
+  return { score: Math.min(100, Math.round((flags / max) * 100)), flags, max_flags: max, has_author, has_date, has_about, has_contact, is_sus_tld };
+}
+
+function score_misinfo(text) {
+  const empty = { score: 0, misinfo_hits: 0, emotional_hits: 0, found_misinfo: [], found_emotional: [] };
+  if (!text || text.length < 100) return empty;
+  const lower = text.toLowerCase();
+  const found_misinfo = misinfo_phrases.filter(p => lower.includes(p));
+  const found_emotional = emotional_phrases.filter(p => lower.includes(p));
+  const misinfo_score = Math.min(100, found_misinfo.length * 18);
+  const emotional_score = Math.min(60, found_emotional.length * 8);
+  const score = Math.min(100, Math.round(misinfo_score * 0.7 + emotional_score * 0.3));
+  return { score, misinfo_hits: found_misinfo.length, emotional_hits: found_emotional.length, found_misinfo, found_emotional };
 }
 
 function score_text(text) {
-  const empty = { score: 50, cv: null, burstiness: null, phrase_hits: 0, ttr: null, sentences: 0 };
+  const empty = { score: 50, cv: null, burstiness: null, phrase_hits: 0, ttr: null, sentences: 0, found_ai_phrases: [] };
   if (!text || text.length < 200) return empty;
   const sentences = text.match(/[^.!?]{15,}[.!?]+/g) || [];
   if (sentences.length < 5) return { ...empty, sentences: sentences.length };
@@ -615,7 +774,8 @@ function score_text(text) {
   const burstiness = Math.sqrt(f_var) / (mf + 0.001);
 
   const lower = text.toLowerCase();
-  const phrase_hits = ai_phrases.filter(p => lower.includes(p)).length;
+  const found_ai_phrases = ai_phrases.filter(p => lower.includes(p));
+  const phrase_hits = found_ai_phrases.length;
   const ttr = (new Set(words)).size / (words.length + 0.001);
 
   const cv_score     = Math.max(0, Math.min(100, Math.round((0.65 - cv) / 0.55 * 100)));
@@ -627,37 +787,76 @@ function score_text(text) {
     cv_score * 0.35 + burst_score * 0.3 + phrase_score * 0.25 + ttr_score * 0.1
   )));
 
-  return {
-    score,
-    cv: Math.round(cv * 100) / 100,
-    burstiness: Math.round(burstiness * 100) / 100,
-    phrase_hits,
-    ttr: Math.round(ttr * 100) / 100,
-    sentences: sentences.length
-  };
+  return { score, cv: Math.round(cv * 100) / 100, burstiness: Math.round(burstiness * 100) / 100, phrase_hits, ttr: Math.round(ttr * 100) / 100, sentences: sentences.length, found_ai_phrases };
 }
 
-function base_score(meta, text, comments, ads, trust) {
-  let base = Math.round(meta.score * 0.20 + text.score * 0.45 + comments.score * 0.15 + ads.score * 0.20);
-  if (trust === "verified") base = Math.round(Math.min(base, 30) * 0.6);
-  if (trust === "flagged")  base = Math.min(100, Math.round(base * 1.4 + 20));
+function score_sources(doc, html) {
+  const lower = html.toLowerCase();
+  const links = doc.querySelectorAll("a[href]");
+  let external_sources = 0;
+  const source_domains = [];
+  links.forEach(a => {
+    const href = (a.getAttribute("href") || "");
+    if (href.startsWith("http") && !href.includes(get_root_domain(window.location.href))) {
+      external_sources++;
+      try {
+        const d = new URL(href).hostname.replace(/^www\./, "");
+        if (!source_domains.includes(d)) source_domains.push(d);
+      } catch {}
+    }
+  });
+  const has_citations = lower.includes("fonte:") || lower.includes("source:") || lower.includes("according to") || lower.includes("segundo") || lower.includes("de acordo com") || lower.includes("citando") || lower.includes("referência");
+  const score = Math.max(0, Math.min(100, Math.round(
+    (external_sources < 2 ? 60 : external_sources < 5 ? 30 : 10) +
+    (has_citations ? 0 : 20)
+  )));
+  return { score, external_sources, has_citations, source_domains: source_domains.slice(0, 5) };
+}
+
+function base_score(meta, text, misinfo, ads, sources, trust) {
+  let base = Math.round(
+    misinfo.score * 0.30 +
+    text.score    * 0.25 +
+    meta.score    * 0.20 +
+    ads.score     * 0.15 +
+    sources.score * 0.10
+  );
+  if (trust === "verified") base = Math.round(Math.min(base, 30) * 0.5);
+  if (trust === "flagged")  base = Math.min(100, Math.round(base * 1.5 + 25));
   return base;
 }
 
-async function polish_score(domain, trust, meta, text, comments, ads, base) {
-  if (!worker_url || worker_url === "YOUR_WORKER_URL_HERE") return base;
+async function ask_ai(domain, trust, meta, text, misinfo, ads, sources, base, text_snippet) {
+  if (!worker_url || worker_url === "your_worker_url_here") return { score: base, verdict: null, flags: [] };
 
-  const prompt = `You are a content authenticity scorer. Given these computed signals from a webpage, return ONLY a single integer between 0 and 100 representing the final synthetic content likelihood score. No explanation, no JSON, just the number.
+  const snippet = text_snippet ? text_snippet.slice(0, 800) : "";
 
-Domain: ${domain}
-Trust status: ${trust || "unknown"}
-Algorithmic base score: ${base}
-Text heuristics score: ${text.score} (cv=${text.cv}, burstiness=${text.burstiness}, ttr=${text.ttr}, ai_phrases=${text.phrase_hits}, sentences=${text.sentences})
-Metadata score: ${meta.score} (missing_flags=${meta.flags}/${meta.max_flags})
-Ad density score: ${ads.score} (networks=${ads.networks}, iframes=${ads.iframes}, ad_divs=${ads.ad_divs})
-HTML comments score: ${comments.score} (count=${comments.raw})
+  const prompt = `you are a misinformation and untrustworthy content detector. analyze these signals from a webpage and return ONLY a valid JSON object — no explanation, no markdown, no code fences.
 
-Adjust the base score using your knowledge of the domain reputation and the signals above. Return only the final integer.`;
+domain: ${domain}
+trust_status: ${trust || "unknown"}
+algorithmic_base_score: ${base}
+misinfo_phrases_found: ${misinfo.found_misinfo.slice(0,5).join(", ") || "none"}
+emotional_phrases_found: ${misinfo.found_emotional.slice(0,5).join(", ") || "none"}
+has_author: ${meta.has_author}
+has_date: ${meta.has_date}
+has_about_page: ${meta.has_about}
+has_contact_page: ${meta.has_contact}
+suspicious_tld: ${meta.is_sus_tld}
+external_sources_count: ${sources.external_sources}
+has_citations: ${sources.has_citations}
+ad_networks_count: ${ads.networks}
+ai_phrases_found: ${text.found_ai_phrases ? text.found_ai_phrases.slice(0,3).join(", ") : "none"}
+text_coefficient_of_variation: ${text.cv}
+text_snippet: "${snippet}"
+
+return this exact json structure:
+{
+  "final_score": <integer 0-100, higher = more untrustworthy/misinfo>,
+  "verdict": "<one sentence in portuguese, lowercase, summarizing trustworthiness>",
+  "red_flags": ["<flag1 in portuguese, lowercase>", "<flag2>"],
+  "green_flags": ["<green1 in portuguese, lowercase>", "<green2>"]
+}`;
 
   try {
     const res = await with_timeout(fetch(worker_url, {
@@ -665,32 +864,42 @@ Adjust the base score using your knowledge of the domain reputation and the sign
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: api_model,
-        max_tokens: 10,
+        max_tokens: 300,
         temperature: 0.1,
         messages: [{ role: "user", content: prompt }]
       })
-    }), 8000);
-    if (!res.ok) return base;
+    }), 10000);
+    if (!res.ok) return { score: base, verdict: null, flags: [] };
     const data = await res.json();
-    const raw = (data.choices[0].message.content || "").trim();
-    const num = parseInt(raw.replace(/\D/g, ""));
-    if (isNaN(num) || num < 0 || num > 100) return base;
-    return Math.round(base * 0.4 + num * 0.6);
+    const raw = (data.choices?.[0]?.message?.content || "").trim();
+    const clean = raw.replace(/```json|```/g, "").trim();
+    const parsed = JSON.parse(clean);
+    const ai_score = parsed.final_score;
+    const final = (!isNaN(ai_score) && ai_score >= 0 && ai_score <= 100)
+      ? Math.round(base * 0.3 + ai_score * 0.7)
+      : base;
+    return {
+      score: final,
+      verdict: parsed.verdict || null,
+      red_flags: parsed.red_flags || [],
+      green_flags: parsed.green_flags || []
+    };
   } catch {
-    return base;
+    return { score: base, verdict: null, red_flags: [], green_flags: [] };
   }
 }
 
 function tier(s) { return s < 35 ? "low" : s < 65 ? "med" : "high"; }
-function tier_label(s) { return s < 35 ? "provavelmente humano" : s < 65 ? "incerto" : "provavelmente ia ou desinformação"; }
+function tier_label(s) { return s < 35 ? "provavelmente confiável" : s < 65 ? "credibilidade incerta" : "alto risco de desinformação"; }
 
 function show_thinking() {
   const steps = [
     "// verificando banco de domínios...",
-    "// buscando página...",
-    "// analisando texto...",
-    "// contando comentários e anúncios...",
-    "// refinando pontuação...",
+    "// buscando página via proxy...",
+    "// analisando frases e linguagem...",
+    "// verificando metadados e fontes...",
+    "// detectando padrões de desinformação...",
+    "// consultando ia para análise profunda...",
   ];
   const r = document.getElementById("results");
   r.style.display = "flex";
@@ -703,7 +912,7 @@ function show_thinking() {
     </div>`;
 }
 
-function render_results(meta, text, comments, ads, overall, trust, from_cache, domain_only) {
+function render_results(meta, text_d, misinfo, ads, sources, overall, trust, ai_result, from_cache, domain_only, report) {
   const r = document.getElementById("results");
   const t = tier(overall);
 
@@ -714,33 +923,126 @@ function render_results(meta, text, comments, ads, overall, trust, from_cache, d
   if (domain_only)          badges += `<div class="trust-badge trust-cached"><span class="trust-dot"></span>análise parcial</div>`;
 
   const locked = trust === "verified";
+  const na = domain_only;
 
   const signals = [
-    { name: "heurísticas textuais",  sub: text.sentences + " frases analisadas",                                               score: text.score,     lock: false,  na: domain_only },
-    { name: "metadados da página",   sub: meta.flags + "/" + meta.max_flags + " sinais ausentes",                              score: meta.score,     lock: locked, na: domain_only },
-    { name: "densidade de anúncios", sub: ads.networks + " redes · " + ads.iframes + " iframes · " + ads.ad_divs + " divs",   score: ads.score,      lock: locked, na: domain_only },
-    { name: "comentários no html",   sub: comments.raw + " comentários detectados",                                            score: comments.score, lock: false,  na: domain_only },
+    { name: "linguagem de desinformação", sub: misinfo.misinfo_hits + " termos · " + misinfo.emotional_hits + " gatilhos emocionais", score: misinfo.score, lock: false, na },
+    { name: "heurísticas textuais",        sub: text_d.sentences + " frases analisadas",                                                score: text_d.score,  lock: false, na },
+    { name: "metadados e credenciais",     sub: meta.flags + "/" + meta.max_flags + " sinais ausentes",                                 score: meta.score,    lock: locked, na },
+    { name: "presença de fontes",          sub: sources.external_sources + " links externos · " + (sources.has_citations ? "citações encontradas" : "sem citações"), score: sources.score, lock: locked, na },
+    { name: "densidade de anúncios",       sub: ads.networks + " redes · " + ads.iframes + " iframes",                                 score: ads.score,     lock: locked, na },
   ];
 
   const raws = [
-    { label: "frases",         value: domain_only ? "—" : text.sentences },
-    { label: "coef. variação", value: domain_only || text.cv === null ? "—" : text.cv },
-    { label: "burstiness",     value: domain_only || text.burstiness === null ? "—" : text.burstiness },
-    { label: "ttr",            value: domain_only || text.ttr === null ? "—" : text.ttr },
-    { label: "frases marcadas",value: domain_only ? "—" : text.phrase_hits },
-    { label: "comentários",    value: domain_only ? "—" : comments.raw },
-    { label: "redes de ads",   value: domain_only ? "—" : ads.networks },
-    { label: "iframes",        value: domain_only ? "—" : ads.iframes },
+    { label: "frases",              value: na ? "—" : text_d.sentences },
+    { label: "coef. variação",      value: na || text_d.cv === null ? "—" : text_d.cv },
+    { label: "burstiness",          value: na || text_d.burstiness === null ? "—" : text_d.burstiness },
+    { label: "ttr",                 value: na || text_d.ttr === null ? "—" : text_d.ttr },
+    { label: "frases ia",           value: na ? "—" : text_d.phrase_hits },
+    { label: "termos misinfo",      value: na ? "—" : misinfo.misinfo_hits },
+    { label: "gatilhos emocionais", value: na ? "—" : misinfo.emotional_hits },
+    { label: "fontes externas",     value: na ? "—" : sources.external_sources },
   ];
+
+  const ai_section = ai_result && ai_result.verdict ? `
+    <p class="section-label">análise por ia</p>
+    <div class="ai-verdict-card">
+      <div class="ai-verdict-header">
+        <span class="ai-badge">// ia //</span>
+      </div>
+      <p class="ai-verdict-text">${ai_result.verdict}</p>
+      <div class="ai-flags">
+        ${(ai_result.red_flags || []).map(f => `<span class="ai-flag-tag bad">⚠ ${f}</span>`).join("")}
+        ${(ai_result.green_flags || []).map(f => `<span class="ai-flag-tag ok">✓ ${f}</span>`).join("")}
+      </div>
+    </div>` : "";
+
+  const found_misinfo_tags = misinfo.found_misinfo && misinfo.found_misinfo.length
+    ? `<div class="found-phrases">${misinfo.found_misinfo.slice(0,8).map(p => `<span class="found-phrase">${p}</span>`).join("")}</div>`
+    : `<span class="report-val">nenhum encontrado</span>`;
+
+  const found_emotional_tags = misinfo.found_emotional && misinfo.found_emotional.length
+    ? `<div class="found-phrases">${misinfo.found_emotional.slice(0,8).map(p => `<span class="found-phrase">${p}</span>`).join("")}</div>`
+    : `<span class="report-val">nenhum encontrado</span>`;
+
+  const source_tags = sources.source_domains && sources.source_domains.length
+    ? `<div class="found-phrases">${sources.source_domains.map(d => `<span class="found-phrase">${d}</span>`).join("")}</div>`
+    : `<span class="report-val">—</span>`;
+
+  const report_section = `
+    <p class="section-label">relatório de varredura</p>
+    <div class="report-card">
+      <div class="report-row">
+        <span class="report-key">url analisada</span>
+        <span class="report-val highlight">${report.url}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">domínio</span>
+        <span class="report-val highlight">${report.domain}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">status de confiança</span>
+        <span class="report-val highlight">${trust === "verified" ? "verificado na base de dados" : trust === "flagged" ? "sinalizado na base de dados" : "desconhecido"}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">tld suspeito</span>
+        <span class="report-val">${meta.is_sus_tld ? "sim" : "não"}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">autor identificado</span>
+        <span class="report-val">${na ? "—" : (meta.has_author ? "sim" : "não")}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">data de publicação</span>
+        <span class="report-val">${na ? "—" : (meta.has_date ? "presente" : "ausente")}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">página sobre / contato</span>
+        <span class="report-val">${na ? "—" : ((meta.has_about ? "sobre ✓" : "sem sobre") + " · " + (meta.has_contact ? "contato ✓" : "sem contato"))}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">citações de fontes</span>
+        <span class="report-val">${na ? "—" : (sources.has_citations ? "encontradas" : "não encontradas")}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">domínios externos citados</span>
+        ${na ? '<span class="report-val">—</span>' : source_tags}
+      </div>
+      <div class="report-row">
+        <span class="report-key">termos de desinformação</span>
+        ${na ? '<span class="report-val">—</span>' : found_misinfo_tags}
+      </div>
+      <div class="report-row">
+        <span class="report-key">gatilhos emocionais</span>
+        ${na ? '<span class="report-val">—</span>' : found_emotional_tags}
+      </div>
+      <div class="report-row">
+        <span class="report-key">redes de anúncios</span>
+        <span class="report-val">${na ? "—" : (ads.networks > 0 ? ads.networks + " detectadas" : "nenhuma")}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">texto extraído</span>
+        <span class="report-val">${na ? "falha na extração" : report.char_count + " chars · " + text_d.sentences + " frases"}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">análise por ia</span>
+        <span class="report-val">${ai_result && ai_result.verdict ? "concluída" : "indisponível"}</span>
+      </div>
+      <div class="report-row">
+        <span class="report-key">horário da varredura</span>
+        <span class="report-val">${report.timestamp}</span>
+      </div>
+    </div>`;
 
   r.innerHTML = `
     <div class="score-hero">
       <div class="scan-line"></div>
-      <p class="score-label">probabilidade de ia</p>
+      <p class="score-label">risco de desinformação</p>
       <div class="score-number"><span id="count-num">0</span><span class="score-pct">%</span></div>
       <div class="score-tag tag-${t}">${tier_label(overall)}</div>
       <div style="margin-top:0.75rem;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${badges}</div>
     </div>
+    ${ai_section}
     <p class="section-label">análise de sinais</p>
     <div class="signals-grid">${signals.map(s => `
       <div class="signal-card${(s.lock || s.na) ? " locked" : ""}">
@@ -758,7 +1060,8 @@ function render_results(meta, text, comments, ads, overall, trust, from_cache, d
         <div class="raw-value">${s.value}</div>
         <div class="raw-label">${s.label}</div>
       </div>`).join("")}
-    </div>`;
+    </div>
+    ${report_section}`;
 
   setTimeout(() => {
     document.querySelectorAll(".signal-bar-fill").forEach(el => {
@@ -791,38 +1094,52 @@ async function confirm_scan() {
 
   const cached = get_cache(url);
   if (cached) {
-    render_results(cached.meta, cached.text, cached.comments, cached.ads, cached.overall, trust, true, false);
+    render_results(
+      cached.meta, cached.text_d, cached.misinfo, cached.ads, cached.sources,
+      cached.overall, trust, cached.ai_result, true, false,
+      { url, domain, char_count: cached.char_count, timestamp: new Date().toLocaleString("pt-BR") }
+    );
     document.getElementById("scan-btn").disabled = false;
     return;
   }
 
   show_thinking();
 
-  const empty_meta     = { score: 50, flags: 0, max_flags: 8 };
-  const empty_text     = { score: 50, cv: null, burstiness: null, phrase_hits: 0, ttr: null, sentences: 0 };
-  const empty_comments = { score: 0, raw: 0 };
-  const empty_ads      = { score: 0, networks: 0, iframes: 0, ad_divs: 0 };
+  const empty_meta    = { score: 50, flags: 0, max_flags: 14, has_author: false, has_date: false, has_about: false, has_contact: false, is_sus_tld: false };
+  const empty_text    = { score: 50, cv: null, burstiness: null, phrase_hits: 0, ttr: null, sentences: 0, found_ai_phrases: [] };
+  const empty_misinfo = { score: 0, misinfo_hits: 0, emotional_hits: 0, found_misinfo: [], found_emotional: [] };
+  const empty_ads     = { score: 0, networks: 0, iframes: 0, ad_divs: 0 };
+  const empty_sources = { score: 50, external_sources: 0, has_citations: false, source_domains: [] };
 
-  let meta = empty_meta, txt_d = empty_text, coms = empty_comments, ads = empty_ads;
+  let meta = empty_meta, text_d = empty_text, misinfo = empty_misinfo, ads = empty_ads, sources = empty_sources;
   let domain_only = false;
+  let char_count = 0;
+  let text_snippet = "";
 
   try {
     const html = await fetch_html(url);
     const doc  = parse_doc(html);
     const text = extract_text(doc);
-    meta  = score_metadata(doc, html);
-    txt_d = score_text(text);
-    coms  = score_comments(html);
-    ads   = score_ads(html, doc);
+    char_count = text.length;
+    text_snippet = text.slice(0, 800);
+    meta    = score_metadata(doc, html, domain);
+    text_d  = score_text(text);
+    misinfo = score_misinfo(text);
+    ads     = score_ads(html, doc);
+    sources = score_sources(doc, html);
   } catch {
     domain_only = true;
+    meta = score_metadata(null, "", domain);
   }
 
-  const base    = base_score(meta, txt_d, coms, ads, trust);
-  const overall = await polish_score(domain, trust, meta, txt_d, coms, ads, base);
+  const base    = base_score(meta, text_d, misinfo, ads, sources, trust);
+  const ai_result = await ask_ai(domain, trust, meta, text_d, misinfo, ads, sources, base, text_snippet);
+  const overall = ai_result.score;
 
-  set_cache(url, { meta, text: txt_d, comments: coms, ads, overall });
-  render_results(meta, txt_d, coms, ads, overall, trust, false, domain_only);
+  const report = { url, domain, char_count, timestamp: new Date().toLocaleString("pt-BR") };
+
+  set_cache(url, { meta, text_d, misinfo, ads, sources, overall, ai_result, char_count });
+  render_results(meta, text_d, misinfo, ads, sources, overall, trust, ai_result, false, domain_only, report);
   document.getElementById("scan-btn").disabled = false;
 }
 
