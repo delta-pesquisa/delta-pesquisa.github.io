@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>delta</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 1rem 5rem;
+  }
+
+  header { text-align: center; margin-bottom: 2.5rem; }
+
+  .logo {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.4em;
+    color: #444;
+    margin-bottom: 0.5rem;
+  }
+
+  h1 {
+    font-size: 2.4rem;
+    font-weight: 300;
+    letter-spacing: -0.04em;
+    color: #fff;
+    margin-bottom: 0.3rem;
+  }
+
+  .subtitle { font-size: 13px; color: #555; }
+
+  .card {
+    background: #0a0a0a;
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 1.75rem;
+    width: 100%;
+    max-width: 660px;
+  }
+
+  .input-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    color: #444;
+    display: block;
+    margin-bottom: 0.6rem;
+  }
+
+  input[type="text"] {
+    width: 100%;
+    padding: 13px 16px;
+    background: #111;
+    border: 1px solid #1e1e1e;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border 0.15s;
+  }
+
+  input[type="text"]:focus { border-color: #fff; }
+  input[type="text"]::placeholder { color: #333; }
+
+  .scan-btn {
+    width: 100%;
+    margin-top: 1.1rem;
+    padding: 14px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .scan-btn:hover:not(:disabled) { background: #ddd; }
+  .scan-btn:active:not(:disabled) { transform: scale(0.99); }
+  .scan-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+
+  #results {
+    width: 100%;
+    max-width: 660px;
+    margin-top: 1.25rem;
+    display: none;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .score-hero {
+    background: #0a0a0a;
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .scan-line {
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%; height: 1px;
+    background: linear-gradient(90deg, transparent, #fff, transparent);
+    animation: scanline 1.4s ease-out forwards;
+  }
+
+  @keyframes scanline { to { left: 160%; } }
+
+  .score-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #444;
+    margin-bottom: 1rem;
+  }
+
+  .score-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 7rem;
+    font-weight: 700;
+    line-height: 1;
+    color: #fff;
+  }
+
+  .score-pct { font-size: 2.5rem; vertical-align: super; }
+
+  .score-tag {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 4px 14px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+  }
+
+  .tag-low  { background: #111; color: #666; border: 1px solid #2a2a2a; }
+  .tag-med  { background: #1a1a1a; color: #aaa; border: 1px solid #3a3a3a; }
+  .tag-high { background: #fff; color: #000; }
+
+  .trust-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 0.75rem;
+    padding: 5px 12px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .trust-verified { background: #0f1f0f; color: #4a9; border: 1px solid #1a3a1a; }
+  .trust-flagged  { background: #1f0f0f; color: #a44; border: 1px solid #3a1a1a; }
+  .trust-cached   { background: #111; color: #555; border: 1px solid #222; }
+
+  .trust-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #444;
+    padding: 0 2px;
+  }
+
+  .signals-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .signal-card {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .signal-card.locked { opacity: 0.45; }
+
+  .signal-info { flex: 1; }
+  .signal-name { font-size: 13px; font-weight: 500; color: #ccc; margin-bottom: 3px; }
+
+  .signal-sub {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: #444;
+    margin-bottom: 7px;
+  }
+
+  .signal-bar-bg { height: 2px; background: #1a1a1a; border-radius: 4px; overflow: hidden; }
+
+  .signal-bar-fill {
+    height: 100%;
+    background: #fff;
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.9s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .signal-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    min-width: 56px;
+    text-align: right;
+  }
+
+  .raw-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .raw-card {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    text-align: center;
+  }
+
+  .raw-value {
+    font-family: 'Space Mono', monospace;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 5px;
+  }
+
+  .raw-label { font-size: 11px; color: #444; }
+
+  .thinking {
+    background: #0a0a0a;
+    border: 1px solid #1e1e1e;
+    border-radius: 12px;
+    padding: 3rem;
+    text-align: center;
+  }
+
+  .spinner {
+    width: 28px; height: 28px;
+    border: 1px solid #222;
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    margin: 0 auto 1rem;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .thinking-text { font-family: 'Space Mono', monospace; font-size: 11px; color: #444; }
+  .thinking-text span { display: block; margin-top: 5px; opacity: 0; animation: fadein 0.4s forwards; }
+  .thinking-text span:nth-child(1) { animation-delay: 0.1s; }
+  .thinking-text span:nth-child(2) { animation-delay: 1.0s; }
+  .thinking-text span:nth-child(3) { animation-delay: 2.0s; }
+  .thinking-text span:nth-child(4) { animation-delay: 3.0s; }
+  .thinking-text span:nth-child(5) { animation-delay: 3.9s; }
+  @keyframes fadein { to { opacity: 1; } }
+
+  .disclaimer {
+    font-size: 11px;
+    color: #333;
+    text-align: center;
+    margin-top: 2rem;
+    max-width: 660px;
+    line-height: 1.7;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+  }
+
+  .modal {
+    background: #0a0a0a;
+    border: 1px solid #2a2a2a;
+    border-radius: 14px;
+    padding: 2rem;
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .modal-icon { font-size: 1.8rem; margin-bottom: 1rem; }
+
+  .modal-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    color: #888;
+    margin-bottom: 0.75rem;
+  }
+
+  .modal-text {
+    font-size: 14px;
+    color: #aaa;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .modal-btn {
+    padding: 11px 28px;
+    background: #fff;
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .modal-btn:hover { background: #ddd; }
+
+  .modal-cancel {
+    display: block;
+    margin-top: 0.75rem;
+    font-size: 12px;
+    color: #444;
+    cursor: pointer;
+    background: none;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: underline;
+  }
+
+  .modal-cancel:hover { color: #888; }
+
+  .objectives {
+    width: 100%;
+    max-width: 660px;
+    margin-top: 3rem;
+  }
+
+  .objectives-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.3em;
+    color: #444;
+    margin-bottom: 1rem;
+    padding: 0 2px;
+  }
+
+  .objectives-card {
+    background: #0a0a0a;
+    border: 1px solid #1a1a1a;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .obj-item { display: flex; gap: 0.75rem; align-items: flex-start; }
+
+  .obj-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: #333;
+    min-width: 20px;
+    padding-top: 2px;
+  }
+
+  .obj-text { font-size: 13px; color: #666; line-height: 1.65; }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="logo">// DELTA //</p>
+  <h1>detector de conteúdo ia</h1>
+  <p class="subtitle">saiba o que é humano e o que simplesmente não é. grátis e privado para sempre.</p>
+</header>
+
+<div class="card">
+  <label class="input-label" for="url-input">url alvo</label>
+  <input type="text" id="url-input" placeholder="https://exemplo.com/artigo" />
+  <button class="scan-btn" id="scan-btn" onclick="run_scan()">▶ iniciar análise</button>
+</div>
+
+<div id="results"></div>
+
+<p class="disclaimer">delta usa heurísticas locais — as pontuações são indicadores, não veredictos.</p>
+
+<section class="objectives">
+  <p class="objectives-title">nossos objetivos</p>
+  <div class="objectives-card">
+    <div class="obj-item">
+      <span class="obj-num">01</span>
+      <p class="obj-text">combater a desinformação digital, ajudando pessoas que não conseguem identificar tal anomalias.</p>
+    </div>
+    <div class="obj-item">
+      <span class="obj-num">02</span>
+      <p class="obj-text">oferecer uma ferramenta, grátis, sem anuncios e principalmente privada.</p>
+    </div>
+    <div class="obj-item">
+      <span class="obj-num">03</span>
+      <p class="obj-text">educar sobre os sinais que diferenciam jornalismo humano de conteúdo automatizado — como variação textual, presença de autoria e densidade publicitária.</p>
+    </div>
+    <div class="obj-item">
+      <span class="obj-num">04</span>
+      <p class="obj-text">incentivar o pensamento crítico: DELTA não substitui sua própria pesquisa, apenas te dá um ponto de partida.</p>
+    </div>
+  </div>
+</section>
+
+<div class="modal-backdrop" id="warn-modal" style="display:none;">
+  <div class="modal">
+    <div class="modal-icon">⚠</div>
+    <p class="modal-title">antes de continuar</p>
+    <p class="modal-text">os resultados não são 100% certos, por isso, recomendo que pesquise você mesmo(a) a reputação do site.</p>
+    <button class="modal-btn" onclick="confirm_scan()">entendi, continuar</button>
+    <button class="modal-cancel" onclick="cancel_scan()">cancelar</button>
+  </div>
+</div>
+
+<script>
+const cache_prefix = "delta_cache_";
+const cache_ttl = 1000 * 60 * 60 * 24;
+
+// ─── replace this with your cloudflare worker url after deploying it ───
+const worker_url = "YOUR_WORKER_URL_HERE";
+// ──────────────────────────────────────────────────────────────────────
+
+const api_model = "llama-3.3-70b-versatile";
+
+const proxies = [
+  u => "https://api.allorigins.win/get?url=" + encodeURIComponent(u),
+  u => "https://api.codetabs.com/v1/proxy?quest=" + encodeURIComponent(u),
+  u => "https://corsproxy.io/?" + encodeURIComponent(u)
+];
+
+const trust_db = {
+  verified: [
+    "youtube.com","youtu.be","wikipedia.org","github.com","reddit.com",
+    "bbc.com","bbc.co.uk","reuters.com","apnews.com","npr.org",
+    "theguardian.com","nytimes.com","washingtonpost.com","bloomberg.com",
+    "economist.com","nature.com","science.org","pubmed.ncbi.nlm.nih.gov",
+    "arxiv.org","stackoverflow.com","mozilla.org","w3.org","iana.org",
+    "twitter.com","x.com","instagram.com","linkedin.com","facebook.com",
+    "twitch.tv","vimeo.com","spotify.com","soundcloud.com",
+    "archive.org","wolframalpha.com","khanacademy.org","coursera.org",
+    "medium.com","substack.com","amazon.com","google.com","microsoft.com",
+    "apple.com","cloudflare.com","digitalocean.com","netlify.com",
+    "g1.globo.com","uol.com.br","folha.uol.com.br","estadao.com.br",
+    "oglobo.globo.com","agenciabrasil.ebc.com.br","cnnbrasil.com.br",
+    "nexojornal.com.br","cartacapital.com.br","gazetadopovo.com.br",
+    "valor.com.br","exame.com","techtudo.com.br"
+  ],
+  flagged: [
+    "naturalnews.com","infowars.com","breitbart.com","thegatewaypundit.com",
+    "worldnewsdailyreport.com","empirenews.net","newslo.com",
+    "beforeitsnews.com","yournewswire.com","newspunch.com",
+    "oesquerdista.com.br","direita.com.br","jornaldaciidade.com.br",
+    "oantagonista.com","revistaoeste.com.br"
+  ]
+};
+
+const ai_phrases = [
+  "in today's world","it's worth noting","in conclusion","furthermore",
+  "it is important to note","in summary","delve into","dive into",
+  "leverage","comprehensive","pivotal","multifaceted","in the realm of",
+  "it's crucial","moreover","as we navigate","ever-evolving","cutting-edge",
+  "seamlessly","game-changer","paradigm","no mundo atual","é importante notar",
+  "em conclusão","além disso","em resumo","é crucial","vale ressaltar",
+  "no âmbito","à medida que navegamos","em constante evolução","de ponta",
+  "de forma integrada","transformador","abrangente","multifacetado"
+];
+
+const ad_networks = [
+  "googletag","adsbygoogle","doubleclick","taboola","outbrain",
+  "revcontent","mgid","pubmatic","openx","criteo","sharethrough",
+  "amazon-adsystem","media.net","propellerads","popcash","adsterra",
+  "prebid","header-bidding","exoclick","ads.txt"
+];
+
+let pending_url = null;
+
+function get_root_domain(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ""); }
+  catch { return ""; }
+}
+
+function check_trust_db(domain) {
+  for (const d of trust_db.verified) { if (domain === d || domain.endsWith("." + d)) return "verified"; }
+  for (const d of trust_db.flagged)  { if (domain === d || domain.endsWith("." + d)) return "flagged"; }
+  return null;
+}
+
+function get_cache(key) {
+  try {
+    const raw = localStorage.getItem(cache_prefix + key);
+    if (!raw) return null;
+    const obj = JSON.parse(raw);
+    if (Date.now() - obj.ts > cache_ttl) { localStorage.removeItem(cache_prefix + key); return null; }
+    return obj.data;
+  } catch { return null; }
+}
+
+function set_cache(key, data) {
+  try { localStorage.setItem(cache_prefix + key, JSON.stringify({ ts: Date.now(), data })); } catch {}
+}
+
+function with_timeout(promise, ms) {
+  return Promise.race([
+    promise,
+    new Promise((_, rej) => setTimeout(() => rej(new Error("timeout")), ms))
+  ]);
+}
+
+async function try_proxy(proxy_fn, url) {
+  const res = await with_timeout(fetch(proxy_fn(url)), 6000);
+  if (!res.ok) throw new Error("status " + res.status);
+  const text = await res.text();
+  let html = text;
+  try {
+    const j = JSON.parse(text);
+    if (j.contents) html = j.contents;
+    else if (j.body) html = j.body;
+  } catch {}
+  if (!html || html.length < 100) throw new Error("empty");
+  return html;
+}
+
+async function fetch_html(url) {
+  const attempts = proxies.map(fn => try_proxy(fn, url));
+  const errors = [];
+  for (const attempt of attempts) {
+    try { return await attempt; } catch (e) { errors.push(e.message); }
+  }
+  throw new Error("todos os proxies falharam");
+}
+
+function parse_doc(html) {
+  return (new DOMParser()).parseFromString(html, "text/html");
+}
+
+function extract_text(doc) {
+  doc.querySelectorAll("script,style,nav,footer,header,aside,noscript").forEach(el => el.remove());
+  return ((doc.body || doc.documentElement).innerText || "").replace(/\s+/g, " ").trim();
+}
+
+function score_comments(html) {
+  const count = (html.match(/<!--[\s\S]*?-->/g) || []).length;
+  return { score: Math.min(100, Math.round((count / 30) * 100)), raw: count };
+}
+
+function score_ads(html, doc) {
+  const lower = html.toLowerCase();
+  const networks = ad_networks.filter(n => lower.includes(n)).length;
+  const iframes = doc.querySelectorAll("iframe").length;
+  const ad_divs = doc.querySelectorAll(
+    '[id*="ad"],[class*="ad-"],[class*="-ad"],[class*="ads"],[class*="advertisement"],[class*="sponsor"]'
+  ).length;
+  const total = networks + Math.min(iframes, 6) + Math.min(ad_divs, 6);
+  return { score: Math.min(100, Math.round((total / 20) * 100)), networks, iframes, ad_divs };
+}
+
+function score_metadata(doc, html) {
+  let flags = 0;
+  const author_tags = ['meta[name="author"]','[rel="author"]','[class*="author"]','[itemprop="author"]','[class*="byline"]','[class*="writer"]'];
+  if (!author_tags.some(s => doc.querySelector(s))) flags += 3;
+  const date_tags = ['meta[property="article:published_time"]','time','[itemprop="datePublished"]','[class*="date"]','[class*="published"]'];
+  if (!date_tags.some(s => doc.querySelector(s))) flags += 2;
+  if (!html.includes("/about") && !html.includes("/sobre")) flags++;
+  if (!html.includes("/contact") && !html.includes("/contato")) flags++;
+  if (!doc.querySelector('meta[name="description"]')) flags++;
+  const max = 8;
+  return { score: Math.min(100, Math.round((flags / max) * 100)), flags, max_flags: max };
+}
+
+function score_text(text) {
+  const empty = { score: 50, cv: null, burstiness: null, phrase_hits: 0, ttr: null, sentences: 0 };
+  if (!text || text.length < 200) return empty;
+  const sentences = text.match(/[^.!?]{15,}[.!?]+/g) || [];
+  if (sentences.length < 5) return { ...empty, sentences: sentences.length };
+
+  const lengths = sentences.map(s => s.trim().split(/\s+/).length);
+  const mean = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+  const variance = lengths.reduce((a, b) => a + Math.pow(b - mean, 2), 0) / lengths.length;
+  const cv = Math.sqrt(variance) / mean;
+
+  const words = text.toLowerCase().match(/\b[a-záéíóúãõâêîôûçàèìòùäëïöü]{4,}\b/g) || [];
+  const freq = {};
+  words.forEach(w => freq[w] = (freq[w] || 0) + 1);
+  const freqs = Object.values(freq);
+  const mf = freqs.reduce((a, b) => a + b, 0) / freqs.length;
+  const f_var = freqs.reduce((a, b) => a + Math.pow(b - mf, 2), 0) / freqs.length;
+  const burstiness = Math.sqrt(f_var) / (mf + 0.001);
+
+  const lower = text.toLowerCase();
+  const phrase_hits = ai_phrases.filter(p => lower.includes(p)).length;
+  const ttr = (new Set(words)).size / (words.length + 0.001);
+
+  const cv_score     = Math.max(0, Math.min(100, Math.round((0.65 - cv) / 0.55 * 100)));
+  const burst_score  = Math.max(0, Math.min(100, Math.round((2.5 - burstiness) / 2.0 * 100)));
+  const phrase_score = Math.min(100, phrase_hits * 12);
+  const ttr_score    = ttr < 0.25 ? 80 : ttr > 0.55 ? 20 : Math.round(50 - (ttr - 0.4) * 150);
+
+  const score = Math.max(0, Math.min(100, Math.round(
+    cv_score * 0.35 + burst_score * 0.3 + phrase_score * 0.25 + ttr_score * 0.1
+  )));
+
+  return {
+    score,
+    cv: Math.round(cv * 100) / 100,
+    burstiness: Math.round(burstiness * 100) / 100,
+    phrase_hits,
+    ttr: Math.round(ttr * 100) / 100,
+    sentences: sentences.length
+  };
+}
+
+function base_score(meta, text, comments, ads, trust) {
+  let base = Math.round(meta.score * 0.20 + text.score * 0.45 + comments.score * 0.15 + ads.score * 0.20);
+  if (trust === "verified") base = Math.round(Math.min(base, 30) * 0.6);
+  if (trust === "flagged")  base = Math.min(100, Math.round(base * 1.4 + 20));
+  return base;
+}
+
+async function polish_score(domain, trust, meta, text, comments, ads, base) {
+  if (!worker_url || worker_url === "YOUR_WORKER_URL_HERE") return base;
+
+  const prompt = `You are a content authenticity scorer. Given these computed signals from a webpage, return ONLY a single integer between 0 and 100 representing the final synthetic content likelihood score. No explanation, no JSON, just the number.
+
+Domain: ${domain}
+Trust status: ${trust || "unknown"}
+Algorithmic base score: ${base}
+Text heuristics score: ${text.score} (cv=${text.cv}, burstiness=${text.burstiness}, ttr=${text.ttr}, ai_phrases=${text.phrase_hits}, sentences=${text.sentences})
+Metadata score: ${meta.score} (missing_flags=${meta.flags}/${meta.max_flags})
+Ad density score: ${ads.score} (networks=${ads.networks}, iframes=${ads.iframes}, ad_divs=${ads.ad_divs})
+HTML comments score: ${comments.score} (count=${comments.raw})
+
+Adjust the base score using your knowledge of the domain reputation and the signals above. Return only the final integer.`;
+
+  try {
+    const res = await with_timeout(fetch(worker_url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: api_model,
+        max_tokens: 10,
+        temperature: 0.1,
+        messages: [{ role: "user", content: prompt }]
+      })
+    }), 8000);
+    if (!res.ok) return base;
+    const data = await res.json();
+    const raw = (data.choices[0].message.content || "").trim();
+    const num = parseInt(raw.replace(/\D/g, ""));
+    if (isNaN(num) || num < 0 || num > 100) return base;
+    return Math.round(base * 0.4 + num * 0.6);
+  } catch {
+    return base;
+  }
+}
+
+function tier(s) { return s < 35 ? "low" : s < 65 ? "med" : "high"; }
+function tier_label(s) { return s < 35 ? "provavelmente humano" : s < 65 ? "incerto" : "provavelmente ia ou desinformação"; }
+
+function show_thinking() {
+  const steps = [
+    "// verificando banco de domínios...",
+    "// buscando página...",
+    "// analisando texto...",
+    "// contando comentários e anúncios...",
+    "// refinando pontuação...",
+  ];
+  const r = document.getElementById("results");
+  r.style.display = "flex";
+  r.innerHTML = `
+    <div class="thinking">
+      <div class="spinner"></div>
+      <div class="thinking-text">
+        ${steps.map((s, i) => `<span style="animation-delay:${i * 0.9}s">${s}</span>`).join("")}
+      </div>
+    </div>`;
+}
+
+function render_results(meta, text, comments, ads, overall, trust, from_cache, domain_only) {
+  const r = document.getElementById("results");
+  const t = tier(overall);
+
+  let badges = "";
+  if (trust === "verified") badges += `<div class="trust-badge trust-verified"><span class="trust-dot"></span>domínio verificado</div>`;
+  if (trust === "flagged")  badges += `<div class="trust-badge trust-flagged"><span class="trust-dot"></span>domínio sinalizado</div>`;
+  if (from_cache)           badges += `<div class="trust-badge trust-cached"><span class="trust-dot"></span>resultado em cache</div>`;
+  if (domain_only)          badges += `<div class="trust-badge trust-cached"><span class="trust-dot"></span>análise parcial</div>`;
+
+  const locked = trust === "verified";
+
+  const signals = [
+    { name: "heurísticas textuais",  sub: text.sentences + " frases analisadas",                                               score: text.score,     lock: false,  na: domain_only },
+    { name: "metadados da página",   sub: meta.flags + "/" + meta.max_flags + " sinais ausentes",                              score: meta.score,     lock: locked, na: domain_only },
+    { name: "densidade de anúncios", sub: ads.networks + " redes · " + ads.iframes + " iframes · " + ads.ad_divs + " divs",   score: ads.score,      lock: locked, na: domain_only },
+    { name: "comentários no html",   sub: comments.raw + " comentários detectados",                                            score: comments.score, lock: false,  na: domain_only },
+  ];
+
+  const raws = [
+    { label: "frases",         value: domain_only ? "—" : text.sentences },
+    { label: "coef. variação", value: domain_only || text.cv === null ? "—" : text.cv },
+    { label: "burstiness",     value: domain_only || text.burstiness === null ? "—" : text.burstiness },
+    { label: "ttr",            value: domain_only || text.ttr === null ? "—" : text.ttr },
+    { label: "frases marcadas",value: domain_only ? "—" : text.phrase_hits },
+    { label: "comentários",    value: domain_only ? "—" : comments.raw },
+    { label: "redes de ads",   value: domain_only ? "—" : ads.networks },
+    { label: "iframes",        value: domain_only ? "—" : ads.iframes },
+  ];
+
+  r.innerHTML = `
+    <div class="score-hero">
+      <div class="scan-line"></div>
+      <p class="score-label">probabilidade de ia</p>
+      <div class="score-number"><span id="count-num">0</span><span class="score-pct">%</span></div>
+      <div class="score-tag tag-${t}">${tier_label(overall)}</div>
+      <div style="margin-top:0.75rem;display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">${badges}</div>
+    </div>
+    <p class="section-label">análise de sinais</p>
+    <div class="signals-grid">${signals.map(s => `
+      <div class="signal-card${(s.lock || s.na) ? " locked" : ""}">
+        <div class="signal-info">
+          <p class="signal-name">${s.name}${s.lock ? " · <span style='color:#333;font-size:11px'>ignorado</span>" : s.na ? " · <span style='color:#333;font-size:11px'>n/a</span>" : ""}</p>
+          <p class="signal-sub">${s.sub}</p>
+          <div class="signal-bar-bg"><div class="signal-bar-fill" data-w="${(s.lock || s.na) ? 0 : s.score}"></div></div>
+        </div>
+        <div class="signal-pct">${(s.lock || s.na) ? "—" : s.score + "%"}</div>
+      </div>`).join("")}
+    </div>
+    <p class="section-label">dados brutos</p>
+    <div class="raw-grid">${raws.map(s => `
+      <div class="raw-card">
+        <div class="raw-value">${s.value}</div>
+        <div class="raw-label">${s.label}</div>
+      </div>`).join("")}
+    </div>`;
+
+  setTimeout(() => {
+    document.querySelectorAll(".signal-bar-fill").forEach(el => {
+      el.style.width = el.dataset.w + "%";
+    });
+  }, 120);
+
+  let curr = 0;
+  const el = document.getElementById("count-num");
+  const iv = setInterval(() => {
+    curr = Math.min(curr + overall / 40, overall);
+    el.textContent = Math.round(curr);
+    if (curr >= overall) clearInterval(iv);
+  }, 20);
+}
+
+function cancel_scan() {
+  document.getElementById("warn-modal").style.display = "none";
+  pending_url = null;
+  document.getElementById("scan-btn").disabled = false;
+}
+
+async function confirm_scan() {
+  document.getElementById("warn-modal").style.display = "none";
+  const url = pending_url;
+  if (!url) return;
+
+  const domain = get_root_domain(url);
+  const trust  = check_trust_db(domain);
+
+  const cached = get_cache(url);
+  if (cached) {
+    render_results(cached.meta, cached.text, cached.comments, cached.ads, cached.overall, trust, true, false);
+    document.getElementById("scan-btn").disabled = false;
+    return;
+  }
+
+  show_thinking();
+
+  const empty_meta     = { score: 50, flags: 0, max_flags: 8 };
+  const empty_text     = { score: 50, cv: null, burstiness: null, phrase_hits: 0, ttr: null, sentences: 0 };
+  const empty_comments = { score: 0, raw: 0 };
+  const empty_ads      = { score: 0, networks: 0, iframes: 0, ad_divs: 0 };
+
+  let meta = empty_meta, txt_d = empty_text, coms = empty_comments, ads = empty_ads;
+  let domain_only = false;
+
+  try {
+    const html = await fetch_html(url);
+    const doc  = parse_doc(html);
+    const text = extract_text(doc);
+    meta  = score_metadata(doc, html);
+    txt_d = score_text(text);
+    coms  = score_comments(html);
+    ads   = score_ads(html, doc);
+  } catch {
+    domain_only = true;
+  }
+
+  const base    = base_score(meta, txt_d, coms, ads, trust);
+  const overall = await polish_score(domain, trust, meta, txt_d, coms, ads, base);
+
+  set_cache(url, { meta, text: txt_d, comments: coms, ads, overall });
+  render_results(meta, txt_d, coms, ads, overall, trust, false, domain_only);
+  document.getElementById("scan-btn").disabled = false;
+}
+
+function run_scan() {
+  const url = document.getElementById("url-input").value.trim();
+  if (!url) return;
+  document.getElementById("scan-btn").disabled = true;
+  pending_url = url;
+  document.getElementById("warn-modal").style.display = "flex";
+}
+
+document.getElementById("url-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") run_scan();
+});
+</script>
+</body>
+</html>
